@@ -149,7 +149,6 @@ void Calc8XvFile::set_name(const string &name) {
     }
 }
 
-
 void Calc8XvFile::set_comment(const string &comment) {
     for (unsigned int i = 0; i < com_len; i++) {
         if (i < comment.size()) {
@@ -184,7 +183,45 @@ void Calc8XvFile::set_archived(bool archived) {
 }
 
 void Calc8XvFile::write() {
-    // todo
+    // preparing file as a string
+    string file = "";
+
+    // adding all fields
+    for (int i = 0; i < sig_len; i++) {
+        file += _signature[i];
+    }
+    for (int i = 0; i < com_len; i++) {
+        file += _comment[i];
+    }
+    file += numToHex(_file_length, 2);
+    file += numToHex(_header_length, 2);
+    file += numToHex(_data_length, 2);
+    file += (char)_data_type;
+    for (int i = 0; i < name_len; i++) {
+        file += _name[i];
+    }
+    file += (char)_version;
+    file += (char)_flag;
+    file += numToHex(_data_length_body, 2);
+    file += numToHex(_var_length, 2);
+    for (int i = 0; i < _var_length; i++) {
+        file += _data[i];
+        cout << "data " << i << ": " << _data[i] << endl;
+    }
+    file += numToHex(_checksum, 2);
+
+    // writing to file
+    string filename = (string)_name + ".8xv";
+    ofstream fout;
+    fout.open(filename);
+    if (!fout) {
+        cerr << "Failed to write to file: " << filename << endl;
+        return;
+    }
+
+    fout << file;
+
+    fout.close();
 }
 
 void Calc8XvFile::calc_checksum(istream &in) {

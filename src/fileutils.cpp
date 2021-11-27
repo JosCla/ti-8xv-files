@@ -3,6 +3,8 @@
 
 #include <iostream>
 using std::istream;
+#include <string>
+using std::string;
 
 #include "fileutils.h"
 
@@ -33,4 +35,19 @@ int hexCharsToInt(char* str, int len) {
 
 int checksumVal(int n) {
     return (n % 256) + (n / 256);
+}
+
+string numToHex(int n, unsigned int min_len) {
+    string res = "";
+    while (true) {
+        res += (char)(n & 255);
+        n = n / 256;
+        if (n == 0) {break;}
+    }
+
+    while (res.size() < min_len) {
+        res += '\0';
+    }
+
+    return res;
 }

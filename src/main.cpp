@@ -17,6 +17,10 @@ int main() {
         return 1;
     } else {
         calcfile.print();
+
+        calcfile.set_name("BURGER");
+
+        calcfile.write();
     }
 
     return 0;
