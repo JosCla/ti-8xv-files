@@ -30,3 +30,7 @@ int hexCharsToInt(char* str, int len) {
 
     return total;
 }
+
+int checksumVal(int n) {
+    return (n % 256) + (n / 256);
+}

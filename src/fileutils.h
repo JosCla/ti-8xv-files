@@ -8,5 +8,6 @@
 
 int readIntFromHex(std::istream &in, int charLen);
 int hexCharsToInt(char* str, int len);
+int checksumVal(int n);
 
 #endif // FILEUTILS_H

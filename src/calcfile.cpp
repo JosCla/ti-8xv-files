@@ -8,7 +8,7 @@ using std::istream; using std::ostream;
 #include <fstream>
 using std::ifstream; using std::ofstream;
 #include <cstring>
-using std::strcmp; using std::memset; using std::memcpy;
+using std::strcmp; using std::memset; using std::memcpy; using std::strlen;
 #include <string>
 using std::string;
 
@@ -16,13 +16,28 @@ using std::string;
 #include "calcfile.h"
 #include "fileutils.h"
 
-Calc8XvFile::Calc8XvFile() {}
+Calc8XvFile::Calc8XvFile() {
+    memcpy(_signature, expected_sig, sig_len);
+    _header_length = 13;
+
+    set_name("VAR");
+    set_comment("");
+    set_data("");
+
+    _data_type = APPVAR;
+    _version = 0;
+    _flag = UNARCHIVED;
+
+    calc_checksum();
+    _target_checksum = _checksum;
+}
 
 int Calc8XvFile::read(const string &filename) {
     ifstream fin;
     fin.open(filename);
     if (!fin) {
         cerr << "Failed to open file: " << filename << endl;
+        return 1;
     }
 
     return read(fin);
@@ -66,7 +81,7 @@ int Calc8XvFile::read(istream &in) {
     }
 
     // getting file version
-    _version = (short)readIntFromHex(in, short_char_len);
+    _version = (int)readIntFromHex(in, short_char_len);
 
     // getting file flags
     char c_flag;
@@ -88,7 +103,7 @@ int Calc8XvFile::read(istream &in) {
 
     // getting checksum
     _target_checksum = readIntFromHex(in, long_char_len);
-    calc_checksum(in);
+    calc_checksum();
     
     // returning 0 for a successful read
     return 0;
@@ -160,21 +175,52 @@ void Calc8XvFile::set_data(const string &data) {
     _data = new_data;
 }
 
+void Calc8XvFile::set_archived(bool archived) {
+    if (archived) {
+        _flag = ARCHIVED;
+    } else {
+        _flag = UNARCHIVED;
+    }
+}
+
 void Calc8XvFile::write() {
     // todo
 }
 
 void Calc8XvFile::calc_checksum(istream &in) {
     in.seekg(sig_len + com_len + 2);
-    short checksum = 0;
-    for (short i = 0; i < _file_length; i++) {
+    int checksum = 0;
+    for (int i = 0; i < _file_length; i++) {
         char c;
         in.get(c);
-        short val = (short)c;
+        int val = (int)c;
         if (val < 0) {val += 256;}
 
         checksum += val;
     }
 
-    _checksum = checksum;
+    _checksum = (checksum & 65535);
+}
+
+void Calc8XvFile::calc_checksum() {
+    int checksum = 0;
+
+    checksum += checksumVal(_header_length);
+    checksum += checksumVal(_data_length);
+    checksum += (unsigned char)_data_type;
+
+    for (int i = 0; i < name_len; i++) {
+        checksum += (unsigned char)_name[i];
+    }
+
+    checksum += checksumVal(_version);
+    checksum += (unsigned char)_flag;
+    checksum += checksumVal(_data_length_body);
+    checksum += checksumVal(_var_length);
+
+    for (int i = 0; i < _var_length; i++) {
+        checksum += (unsigned char)_data[i];
+    }
+
+    _checksum = (checksum & 65535);
 }

@@ -17,10 +17,6 @@ int main() {
         return 1;
     } else {
         calcfile.print();
-
-        calcfile.set_comment("asdf");
-
-        calcfile.print();
     }
 
     return 0;

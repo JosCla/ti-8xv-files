@@ -45,6 +45,7 @@ public:
     void set_name(const std::string &name);
     void set_comment(const std::string &comment);
     void set_data(const std::string &data);
+    void set_archived(bool archived);
 
     // function for writing back to another file
     void write();
@@ -60,7 +61,7 @@ private:
     int _data_length;
     VAR_TYPE _data_type;
     char _name[name_len];
-    short _version;
+    int _version;
     VAR_FLAG _flag;
 
     // body
@@ -74,6 +75,7 @@ private:
 
     // helper method for calculating checksum
     void calc_checksum(std::istream &in);
+    void calc_checksum();
 };
 
 #endif // CALCFILE_H
