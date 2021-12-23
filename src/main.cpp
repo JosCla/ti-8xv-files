@@ -18,9 +18,14 @@ int main() {
     } else {
         calcfile.print();
 
+        /*
         calcfile.set_name("BURGER");
+        calcfile.set_comment("burger time!");
+        calcfile.set_data("burger moment");
+        calcfile.set_archived(false);
 
         calcfile.write();
+        */
     }
 
     return 0;

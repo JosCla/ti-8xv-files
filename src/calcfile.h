@@ -42,15 +42,18 @@ public:
     bool checksum_valid();
 
     // setters for various fields
-    void set_name(const std::string &name);
+    void set_name(const std::string &name, bool recalc_sum = true);
     void set_comment(const std::string &comment);
-    void set_data(const std::string &data);
-    void set_archived(bool archived);
+    void set_data(const std::string &data, bool recalc_sum = true);
+    void set_archived(bool archived, bool recalc_sum = true);
 
     // function for writing back to another file
     void write();
 
 private:
+    // file extension (for if we read the file)
+    std::string _file_ext;
+
     // file header
     char _signature[sig_len];
     char _comment[com_len];
@@ -67,7 +70,7 @@ private:
     // body
     int _data_length_body;
     int _var_length;
-    char* _data;
+    std::string _data;
 
     // checksum
     int _target_checksum;
@@ -76,6 +79,7 @@ private:
     // helper method for calculating checksum
     void calc_checksum(std::istream &in);
     void calc_checksum();
+    void recalc_checksum();
 };
 
 #endif // CALCFILE_H

@@ -19,17 +19,18 @@ using std::string;
 Calc8XvFile::Calc8XvFile() {
     memcpy(_signature, expected_sig, sig_len);
     _header_length = 13;
-
-    set_name("VAR");
-    set_comment("");
-    set_data("");
-
+    
     _data_type = APPVAR;
     _version = 0;
     _flag = UNARCHIVED;
 
-    calc_checksum();
-    _target_checksum = _checksum;
+    _file_ext = "8xv";
+
+    set_name("VAR", false);
+    set_comment("");
+    set_data("", false);
+
+    recalc_checksum();
 }
 
 int Calc8XvFile::read(const string &filename) {
@@ -39,6 +40,8 @@ int Calc8XvFile::read(const string &filename) {
         cerr << "Failed to open file: " << filename << endl;
         return 1;
     }
+
+    _file_ext = filename.substr(filename.size() - 3);
 
     return read(fin);
 }
@@ -93,11 +96,11 @@ int Calc8XvFile::read(istream &in) {
     _var_length = readIntFromHex(in, long_char_len);
 
     // getting body of the variable
-    char data[_var_length];
+    string data;
     for (int i = 0; i < _var_length; i++) {
         char c;
         in.get(c);
-        data[i] = c;
+        data += c;
     }
     _data = data;
 
@@ -139,7 +142,8 @@ bool Calc8XvFile::checksum_valid() {
     return _checksum == _target_checksum;
 }
 
-void Calc8XvFile::set_name(const string &name) {
+void Calc8XvFile::set_name(const string &name, bool recalc_sum) {
+    // setting the name
     for (unsigned int i = 0; i < name_len; i++) {
         if (i < name.size()) {
             _name[i] = name[i];
@@ -147,9 +151,12 @@ void Calc8XvFile::set_name(const string &name) {
             _name[i] = '\0';
         }
     }
+
+    if (recalc_sum) {recalc_checksum();}
 }
 
 void Calc8XvFile::set_comment(const string &comment) {
+    // setting the comment
     for (unsigned int i = 0; i < com_len; i++) {
         if (i < comment.size()) {
             _comment[i] = comment[i];
@@ -159,7 +166,7 @@ void Calc8XvFile::set_comment(const string &comment) {
     }
 }
 
-void Calc8XvFile::set_data(const string &data) {
+void Calc8XvFile::set_data(const string &data, bool recalc_sum) {
     // finding new file sizes
     _var_length = data.size();
     _data_length = _var_length + 2;
@@ -167,19 +174,19 @@ void Calc8XvFile::set_data(const string &data) {
     _file_length = _data_length + _header_length + 4;
 
     // copying in the data
-    char new_data[data.size()];
-    for (unsigned int i = 0; i < data.size(); i++) {
-        new_data[i] = data[i];
-    }
-    _data = new_data;
+    _data = data;
+
+    if (recalc_sum) {recalc_checksum();}
 }
 
-void Calc8XvFile::set_archived(bool archived) {
+void Calc8XvFile::set_archived(bool archived, bool recalc_sum) {
     if (archived) {
         _flag = ARCHIVED;
     } else {
         _flag = UNARCHIVED;
     }
+
+    if (recalc_sum) {recalc_checksum();}
 }
 
 void Calc8XvFile::write() {
@@ -206,12 +213,11 @@ void Calc8XvFile::write() {
     file += numToHex(_var_length, 2);
     for (int i = 0; i < _var_length; i++) {
         file += _data[i];
-        cout << "data " << i << ": " << _data[i] << endl;
     }
     file += numToHex(_checksum, 2);
 
     // writing to file
-    string filename = (string)_name + ".8xv";
+    string filename = (string)_name + "." + _file_ext;
     ofstream fout;
     fout.open(filename);
     if (!fout) {
@@ -260,4 +266,9 @@ void Calc8XvFile::calc_checksum() {
     }
 
     _checksum = (checksum & 65535);
+}
+
+void Calc8XvFile::recalc_checksum() {
+    calc_checksum();
+    _target_checksum = _checksum;
 }
