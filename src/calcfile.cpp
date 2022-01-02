@@ -189,7 +189,7 @@ void Calc8XvFile::set_archived(bool archived, bool recalc_sum) {
     if (recalc_sum) {recalc_checksum();}
 }
 
-void Calc8XvFile::write() {
+void Calc8XvFile::write(const string &base_path) {
     // preparing file as a string
     string file = "";
 
@@ -217,7 +217,7 @@ void Calc8XvFile::write() {
     file += numToHex(_checksum, 2);
 
     // writing to file
-    string filename = (string)_name + "." + _file_ext;
+    string filename = base_path + (string)_name + "." + _file_ext;
     ofstream fout;
     fout.open(filename);
     if (!fout) {

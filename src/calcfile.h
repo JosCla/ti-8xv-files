@@ -48,7 +48,7 @@ public:
     void set_archived(bool archived, bool recalc_sum = true);
 
     // function for writing back to another file
-    void write();
+    void write(const std::string &base_path = "");
 
 private:
     // file extension (for if we read the file)
