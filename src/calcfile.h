@@ -34,8 +34,13 @@ public:
     int read(const std::string &filename);
     int read(std::istream &in);
 
-    // writing contents of file
+    // print file information
     void print(std::ostream &out = std::cout);
+
+    // getters
+    int get_var_length();
+    std::string get_data();
+    int get_checksum();
 
     // validation
     bool sig_valid();

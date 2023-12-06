@@ -134,6 +134,18 @@ void Calc8XvFile::print(ostream &out) {
     cout << "Actual Checksum: " << _checksum << endl;
 }
 
+int Calc8XvFile::get_var_length() {
+    return _var_length;
+}
+
+string Calc8XvFile::get_data() {
+    return _data;
+}
+
+int Calc8XvFile::get_checksum() {
+    return _checksum;
+}
+
 bool Calc8XvFile::sig_valid() {
     return (strcmp(_signature, expected_sig) == 0);
 }
