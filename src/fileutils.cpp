@@ -19,6 +19,10 @@ int readIntFromHex(istream &in, int charLen) {
     return hexCharsToInt(str, charLen);
 }
 
+int hexCharsToInt(string str) {
+    return hexCharsToInt(&(str[0]), str.length());
+}
+
 int hexCharsToInt(char* str, int len) {
     int total = 0;
     for (int i = len - 1; i >= 0; i--) {
